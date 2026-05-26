@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Video Stanza 🔥 + Audio Tradotto</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a001a 100%);
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            padding: 12px;
+        }
+        .videos {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 50px;
+        }
+        @media (min-width: 768px) {
+            .videos { flex-direction: row; margin-top: 60px; }
+        }
+        video {
+            width: 100%;
+            max-width: 100%;
+            background: #000;
+            border-radius: 20px;
+            border: 3px solid #ff1493;
+            transform: scaleX(-1);
+        }
+        @media (min-width: 768px) {
+            video { width: 45%; min-width: 300px; }
+        }
+        .controls, .audio-controls {
+            text-align: center;
+            margin-top: 15px;
+        }
+        button {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #ff1493, #ff69b4);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .status {
+            text-align: center;
+            color: #ff69b4;
+            margin: 10px;
+            font-size: 13px;
+        }
+        h1 {
+            position: fixed;
+            top: 5px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 1.2em;
+            color: #ff69b4;
+            text-shadow: 0 0 8px #ff1493;
+            background: rgba(0,0,0,0.6);
+            padding: 8px;
+            z-index: 100;
+        }
+        @media (min-width: 768px) { h1 { font-size: 1.5em; top: 15px; } }
+        .password-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .password-overlay input {
+            width: 260px;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 25px;
+            border: 2px solid #ff1493;
+            background: #1a1a2e;
+            color: white;
+            text-align: center;
+        }
+        .error { color: #ff4444; margin-top: 10px; }
+        .chat-container {
+            margin-top: 20px;
+            background: rgba(0,0,0,0.85);
+            border-radius: 20px;
+            border: 2px solid #ff1493;
+            padding: 12px;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .messages {
+            height: 130px;
+            overflow-y: auto;
+            margin-bottom: 8px;
+            padding: 8px;
+            background: #1a1a2e;
+            border-radius: 15px;
+            font-size: 13px;
+        }
+        .messages p { margin: 5px 0; color: #fff; word-break: break-word; }
+        .messages p strong { color: #ff69b4; }
+        .input-line { display: flex; gap: 8px; }
+        .input-line input {
+            flex: 1;
+            padding: 10px;
+            background: #1a1a2e;
+            border: 1px solid #ff1493;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 14px;
+        }
+        .input-line button { padding: 10px 18px; margin: 0; }
+        .translate-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .translate-bar label { color: #ff69b4; font-size: 13px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+        .translate-badge {
+            background: #ff1493;
+            color: white;
+            border-radius: 30px;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="passwordOverlay" class="password-overlay">
+        <h2>🔐 Stanza Privata Video + Audio</h2>
+        <input type="password" id="passwordInput" placeholder="Password" autofocus>
+        <button onclick="checkPassword()">Entra</button>
+        <div id="passwordError" class="error"></div>
+    </div>
+
+    <div id="mainContent" style="display: none;">
+        <h1>🔥 Video Stanza 🔥</h1>
+        <div class="status" id="status">🎥 Inizializzazione...</div>
+        <div class="videos">
+            <video id="localVideo" autoplay playsinline muted></video>
+            <video id="remoteVideo" autoplay playsinline></video>
+        </div>
+        <div class="controls">
+            <button onclick="toggleCamera()">📷 Cambia Camera</button>
+        </div>
+        <div class="audio-controls">
+            <button id="audioTranslateToggle" style="background:#444;">🎤 Traduzione vocale OFF</button>
+        </div>
+
+        <div class="chat-container">
+            <div class="translate-bar">
+                <label>
+                    <input type="checkbox" id="translateToggle"> 🌐 Traduci automaticamente (IT ↔ PL)
+                </label>
+                <span class="translate-badge" id="langStatus">🇮🇹 Italiano → Polski</span>
+            </div>
+            <div class="messages" id="messages"></div>
+            <div class="input-line">
+                <input type="text" id="messageInput" placeholder="Scrivi un messaggio..." onkeypress="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()">Invia 💬</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const ROOM_PASSWORD = "hot2026";
+        let socket = null;
+        let localStream = null;
+        let peerConnection = null;
+        let usingFrontCamera = true;
+        let translateEnabled = false;
+        let targetLang = 'pl';
+        let audioTranslateActive = false;
+        let recognition = null;
+
+        // Traduzione testo MyMemory API
+        async function translateText(text, sourceLang, targetLang) {
+            if (!text || text.trim() === "") return text;
+            const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data && data.responseData && data.responseData.translatedText) {
+                    let translated = data.responseData.translatedText;
+                    if (translated === text) return text;
+                    return translated;
+                }
+                return text;
+            } catch (error) {
+                console.error("Errore traduzione testo:", error);
+                return text;
+            }
+        }
+
+        function detectLanguage(text) {
+            const plKeywords = ['cześć', 'kurwa', 'jak się masz', 'dobrze', 'dziękuję', 'co', 'jest', 'polski'];
+            const itKeywords = ['ciao', 'cazzo', 'come stai', 'bene', 'grazie', 'cosa', 'è', 'italiano'];
+            const lower = text.toLowerCase();
+            for (let word of plKeywords) if (lower.includes(word)) return 'pl';
+            for (let word of itKeywords) if (lower.includes(word)) return 'it';
+            return 'it';
+        }
+
+        function updateLangStatus() {
+            const span = document.getElementById('langStatus');
+            if (!translateEnabled) {
+                span.innerText = '🌐 Traduzione OFF';
+                span.style.background = '#555';
+                return;
+            }
+            if (targetLang === 'pl') {
+                span.innerText = '🇮🇹 Italiano → Polski';
+                span.style.background = '#ff1493';
+            } else {
+                span.innerText = '🇵🇱 Polski → Italiano';
+                span.style.background = '#ff1493';
+            }
+        }
+
+        async function displayMessage(originalMsg, senderLang, senderLabel, isVoice = false) {
+            const messagesDiv = document.getElementById('messages');
+            let displayText = originalMsg;
+            if (translateEnabled && senderLang !== targetLang) {
+                const translated = await translateText(originalMsg, senderLang, targetLang);
+                if (translated && translated !== originalMsg) {
+                    displayText = `${originalMsg} → ${translated}`;
+                }
+            }
+            const voiceTag = isVoice ? '🎤 ' : '';
+            messagesDiv.innerHTML += `<p><strong>${voiceTag}${senderLabel}:</strong> ${displayText}</p>`;
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function initSpeechRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                document.getElementById('status').innerHTML = '⚠️ Speech recognition non supportata';
+                return null;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recog = new SpeechRecognition();
+            recog.continuous = true;
+            recog.interimResults = false;
+            recog.lang = targetLang === 'pl' ? 'pl-PL' : 'it-IT';
+            
+            recog.onresult = async (event) => {
+                const last = event.results.length - 1;
+                const text = event.results[last][0].transcript;
+                if (text && text.trim()) {
+                    const detectedLang = detectLanguage(text);
+                    const senderLabel = detectedLang === 'it' ? '🇮🇹 Tu (voce)' : '🇵🇱 Tu (voce)';
+                    await displayMessage(text, detectedLang, senderLabel, true);
+                    socket.emit('chat-message', { originalMsg: text, senderLang: detectedLang, senderLabel: senderLabel, isVoice: true });
+                }
+            };
+            recog.onerror = (event) => {
+                console.error('Speech error:', event.error);
+                if (event.error === 'not-allowed') {
+                    document.getElementById('status').innerHTML = '❌ Permesso microfono negato per traduzione vocale';
+                }
+            };
+            return recog;
+        }
+
+        async function toggleAudioTranslation() {
+            const btn = document.getElementById('audioTranslateToggle');
+            if (!audioTranslateActive) {
+                try {
+                    // Richiedi permesso microfono
+                    await navigator.mediaDevices.getUserMedia({ audio: true });
+                    recognition = initSpeechRecognition();
+                    if (recognition) {
+                        recognition.start();
+                        audioTranslateActive = true;
+                        btn.innerText = '🎤 Traduzione vocale ON';
+                        btn.style.background = '#ff1493';
+                        document.getElementById('status').innerHTML = '🎤 Parla nel microfono, testo tradotto in chat';
+                    } else {
+                        document.getElementById('status').innerHTML = '❌ Speech recognition non supportata';
+                    }
+                } catch(err) {
+                    console.error(err);
+                    document.getElementById('status').innerHTML = '❌ Permesso microfono negato';
+                }
+            } else {
+                if (recognition) {
+                    recognition.stop();
+                    recognition = null;
+                }
+                audioTranslateActive = false;
+                btn.innerText = '🎤 Traduzione vocale OFF';
+                btn.style.background = '#444';
+                document.getElementById('status').innerHTML = '🎤 Traduzione vocale disattivata';
+            }
+        }
+
+        // Configurazione TURN Cloudflare
+        const config = {
+            iceServers: [
+                {
+                    urls: [
+                        "stun:stun.cloudflare.com:3478",
+                        "turn:turn.cloudflare.com:3478?transport=udp",
+                        "turn:turn.cloudflare.com:3478?transport=tcp",
+                        "turns:turn.cloudflare.com:5349?transport=tcp"
+                    ],
+                    username: "g092e4f954736684c13d2e0ae97ef6e0b4e338656cb9f372d4a342a45b2ee4f1",
+                    credential: "0228c44797b7f649fed64afe0361a4683b105aef9182f8886f7e5ac61360fe83"
+                }
+            ],
+            iceTransportPolicy: 'relay'
+        };
+
+        function checkPassword() {
+            const pwd = document.getElementById('passwordInput').value;
+            if (pwd === ROOM_PASSWORD) {
+                document.getElementById('passwordOverlay').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                init();
+            } else {
+                document.getElementById('passwordError').innerText = 'Password errata!';
+            }
+        }
+
+        async function init() {
+            socket = io();
+            
+            socket.on('connect', () => {
+                document.getElementById('status').innerHTML = '✅ Connesso, avvio camera...';
+                startCamera();
+            });
+            
+            socket.on('offer', async (offer) => {
+                if (!peerConnection) await createPeerConnection();
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                socket.emit('answer', answer);
+            });
+            
+            socket.on('answer', async (answer) => {
+                if (peerConnection) await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+            });
+            
+            socket.on('ice-candidate', async (candidate) => {
+                if (peerConnection) await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            });
+
+            socket.on('chat-message', async (data) => {
+                const { originalMsg, senderLang, senderLabel, isVoice } = data;
+                await displayMessage(originalMsg, senderLang, senderLabel, isVoice || false);
+            });
+
+            const toggle = document.getElementById('translateToggle');
+            toggle.addEventListener('change', (e) => {
+                translateEnabled = e.target.checked;
+                updateLangStatus();
+            });
+
+            const audioBtn = document.getElementById('audioTranslateToggle');
+            audioBtn.addEventListener('click', toggleAudioTranslation);
+        }
+
+        async function startCamera() {
+            try {
+                const constraints = {
+                    video: { facingMode: usingFrontCamera ? 'user' : 'environment' },
+                    audio: false
+                };
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                if (localStream) localStream.getTracks().forEach(track => track.stop());
+                localStream = stream;
+                document.getElementById('localVideo').srcObject = stream;
+                document.getElementById('status').innerHTML = '📹 Camera attiva, traduzione vocale opzionale';
+                await createPeerConnection(true);
+            } catch (err) {
+                document.getElementById('status').innerHTML = '❌ Errore camera: ' + err.message;
+            }
+        }
+
+        async function createPeerConnection(isInitiator) {
+            if (peerConnection) peerConnection.close();
+            peerConnection = new RTCPeerConnection(config);
+            if (localStream) {
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+            }
+            peerConnection.ontrack = (event) => {
+                document.getElementById('remoteVideo').srcObject = event.streams[0];
+                document.getElementById('status').innerHTML = '🎬 Video partner in arrivo!';
+            };
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) socket.emit('ice-candidate', event.candidate);
+            };
+            peerConnection.oniceconnectionstatechange = () => {
+                if (peerConnection.iceConnectionState === 'connected') {
+                    document.getElementById('status').innerHTML = '🎥 Connessione video attiva!';
+                }
+            };
+            if (isInitiator) {
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                socket.emit('offer', offer);
+            }
+        }
+
+        async function toggleCamera() {
+            usingFrontCamera = !usingFrontCamera;
+            await startCamera();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const msg = input.value.trim();
+            if (msg && socket) {
+                const msgLang = detectLanguage(msg);
+                const senderLabel = msgLang === 'it' ? '🇮🇹 Tu' : '🇵🇱 Tu';
+                await displayMessage(msg, msgLang, senderLabel, false);
+                socket.emit('chat-message', { originalMsg: msg, senderLang: msgLang, senderLabel: senderLabel, isVoice: false });
+                input.value = '';
+            }
+        }
+
+        document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkPassword();
+        });
+    </script>
+</body>
+</html>
