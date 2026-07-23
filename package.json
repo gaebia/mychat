@@ -1,5 +1,5 @@
 {
-  "name": "stanza-sexy",
+  "name": "mychat",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@vitalets/google-translate-api": "^9.2.1",
-    "express": "^4.21.0",
-    "socket.io": "^4.8.0"
+    "express": "^4.19.2",
+    "socket.io": "^4.7.2"
   }
 }
