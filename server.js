@@ -1,42 +1,63 @@
 const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
-
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors: { origin: "*" }
-});
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+const translate = require('translate');
+
+// Configurazione traduzione
+translate.engine = 'libre'; // o 'google' se hai API key
+translate.from = 'it';
+translate.to = 'pl';
 
 app.use(express.static('public'));
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
 io.on('connection', (socket) => {
-    console.log('✅ Utente connesso:', socket.id);
-    
+    console.log('✅ Utente connesso');
+
+    // Ricezione messaggio testo
+    socket.on('message', async (data) => {
+        const { text, lang } = data;
+        
+        // Traduzione automatica
+        let translated = text;
+        try {
+            if (lang === 'it') {
+                translated = await translate(text, { from: 'it', to: 'pl' });
+            } else if (lang === 'pl') {
+                translated = await translate(text, { from: 'pl', to: 'it' });
+            }
+        } catch (e) {
+            console.log('Errore traduzione:', e);
+        }
+
+        // Invia a tutti i client
+        io.emit('message', {
+            original: text,
+            translated: translated,
+            lang: lang,
+            timestamp: Date.now()
+        });
+    });
+
+    // Offerta WebRTC (video/audio)
     socket.on('offer', (data) => {
         socket.broadcast.emit('offer', data);
     });
+
     socket.on('answer', (data) => {
         socket.broadcast.emit('answer', data);
     });
-    socket.on('ice-candidate', (data) => {
-        socket.broadcast.emit('ice-candidate', data);
+
+    socket.on('candidate', (data) => {
+        socket.broadcast.emit('candidate', data);
     });
-    socket.on('chat-message', (data) => {
-        io.emit('chat-message', data);
-    });
-    
+
     socket.on('disconnect', () => {
-        console.log('❌ Utente disconnesso:', socket.id);
+        console.log('❌ Utente disconnesso');
     });
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`🔥 Server attivo su http://localhost:${PORT}`);
+http.listen(PORT, () => {
+    console.log(`🚀 Server avviato su http://localhost:${PORT}`);
 });
