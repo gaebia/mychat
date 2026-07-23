@@ -109,35 +109,38 @@
         .input-area {
             display: flex;
             gap: 8px;
-            padding: 6px 12px;
+            padding: 8px 12px;
             background: #0f0f0f;
             border-top: 1px solid #2a2a2a;
             flex-shrink: 0;
+            min-height: 50px;
         }
         .input-area input {
             flex: 1;
-            padding: 8px 14px;
+            padding: 10px 16px;
             border: none;
-            border-radius: 20px;
+            border-radius: 24px;
             background: #2a2a2a;
             color: #fff;
-            font-size: 13px;
+            font-size: 14px;
             outline: none;
             min-width: 0;
+            height: 44px;
         }
         .input-area input::placeholder {
             color: #666;
         }
         .input-area button {
-            padding: 8px 16px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 20px;
+            border-radius: 24px;
             background: #2b6bff;
             color: #fff;
             font-weight: 600;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 14px;
             white-space: nowrap;
+            height: 44px;
         }
 
         .controls {
@@ -176,7 +179,7 @@
                 border-radius: 8px;
             }
             .chat-area {
-                min-height: 130px;
+                min-height: 140px;
                 max-height: 35vh;
             }
             .message {
@@ -185,17 +188,20 @@
                 padding: 5px 10px;
             }
             .input-area {
-                padding: 4px 8px;
-                gap: 4px;
+                padding: 6px 8px;
+                gap: 6px;
+                min-height: 48px;
             }
             .input-area input {
-                padding: 6px 10px;
-                font-size: 12px;
-                border-radius: 16px;
+                padding: 8px 12px;
+                font-size: 13px;
+                height: 38px;
+                border-radius: 20px;
             }
             .input-area button {
-                padding: 6px 12px;
-                font-size: 12px;
+                padding: 8px 14px;
+                font-size: 13px;
+                height: 38px;
             }
             .controls button {
                 padding: 3px 10px;
@@ -233,7 +239,7 @@
     <div class="chat-area">
         <div class="messages" id="messages"></div>
         <div class="input-area">
-            <input type="text" id="msgInput" placeholder="Scrivi..." />
+            <input type="text" id="msgInput" placeholder="Scrivi un messaggio..." />
             <button id="sendBtn">Invia</button>
         </div>
     </div>
