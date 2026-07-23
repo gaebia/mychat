@@ -15,7 +15,6 @@
             flex-direction: column;
             overflow: hidden;
         }
-        /* LAYOUT PRINCIPALE */
         .container {
             display: flex;
             flex-direction: column;
@@ -25,7 +24,7 @@
             width: 100%;
         }
 
-        /* VIDEO (2 schermi) */
+        /* VIDEO */
         .video-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -62,7 +61,7 @@
             color: #aaa;
         }
 
-        /* AREA CHAT E TRADUZIONE */
+        /* CHAT */
         .chat-area {
             display: flex;
             flex-direction: column;
@@ -116,6 +115,7 @@
             padding: 10px 12px;
             background: #0f0f0f;
             border-top: 1px solid #2a2a2a;
+            flex-shrink: 0;
         }
         .input-area input {
             flex: 1;
@@ -126,6 +126,7 @@
             color: #fff;
             font-size: 14px;
             outline: none;
+            min-width: 0;
         }
         .input-area input::placeholder {
             color: #666;
@@ -139,18 +140,20 @@
             font-weight: 600;
             cursor: pointer;
             transition: 0.2s;
+            white-space: nowrap;
         }
         .input-area button:hover {
             background: #1a5bff;
         }
 
-        /* CONTROLLI AUDIO/VIDEO */
+        /* CONTROLLI */
         .controls {
             display: flex;
             gap: 12px;
             padding: 8px 12px;
             background: #0f0f0f;
             justify-content: center;
+            flex-shrink: 0;
         }
         .controls button {
             padding: 6px 16px;
@@ -171,22 +174,49 @@
             color: #fff;
         }
 
-        /* RESPONSIVE */
+        /* RESPONSIVE SMARTPHONE */
         @media (max-width: 600px) {
             .video-grid {
                 grid-template-columns: 1fr;
                 flex: 1.5;
+                gap: 4px;
+                padding: 4px;
             }
             .video-wrapper {
-                min-height: 100px;
+                min-height: 120px;
+                border-radius: 8px;
             }
             .chat-area {
-                min-height: 150px;
+                min-height: 140px;
                 max-height: 40vh;
             }
             .message {
                 max-width: 90%;
                 font-size: 13px;
+                padding: 6px 12px;
+            }
+            .input-area {
+                padding: 6px 8px;
+                gap: 6px;
+            }
+            .input-area input {
+                padding: 8px 12px;
+                font-size: 13px;
+                border-radius: 20px;
+            }
+            .input-area button {
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+            .controls button {
+                padding: 4px 12px;
+                font-size: 11px;
+            }
+            .video-label {
+                font-size: 10px;
+                padding: 2px 8px;
+                bottom: 6px;
+                left: 6px;
             }
         }
     </style>
@@ -237,7 +267,6 @@
 
     let localStream;
     let peerConnection;
-    let lang = 'it'; // it o pl
     let micEnabled = true;
     let camEnabled = true;
 
@@ -281,7 +310,6 @@
             }
         };
 
-        // Se siamo il primo, creiamo offerta
         if (!window._offerSent) {
             window._offerSent = true;
             setTimeout(createOffer, 500);
@@ -322,14 +350,13 @@
     // === MESSAGGI ===
     function sendMessage(text) {
         if (!text.trim()) return;
-        const lang = document.getElementById('langBtn').textContent.includes('PL') ? 'it' : 'pl';
+        const lang = langBtn.textContent.includes('PL') ? 'it' : 'pl';
         socket.emit('message', { text: text.trim(), lang: lang });
-        addMessage(text, 'me', '');
         msgInput.value = '';
     }
 
     socket.on('message', (data) => {
-        const label = data.lang === 'it' ? 'Tu (IT)' : 'Lei (PL)';
+        const isMe = data.lang === 'it' ? 'Tu' : 'Lei';
         addMessage(data.original, 'other', data.translated);
     });
 
@@ -337,7 +364,7 @@
         const div = document.createElement('div');
         div.className = `message ${type}`;
         div.innerHTML = text;
-        if (translated) {
+        if (translated && translated !== text) {
             const small = document.createElement('div');
             small.className = 'translated';
             small.textContent = `📝 ${translated}`;
@@ -379,7 +406,6 @@
     // === AVVIO ===
     startCamera();
 
-    // Riconnessione se si perde la connessione
     setTimeout(() => {
         if (!peerConnection) {
             createPeerConnection();
