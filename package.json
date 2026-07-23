@@ -6,8 +6,8 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "@vitalets/google-translate-api": "^9.2.1",
     "express": "^4.19.2",
-    "socket.io": "^4.7.2"
+    "socket.io": "^4.7.2",
+    "translate": "^2.0.0"
   }
 }
