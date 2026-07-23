@@ -3,7 +3,7 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 
-// Traduzione con fetch diretto (senza librerie)
+// Traduzione con fetch diretto a Google Translate
 async function translateText(text, from, to) {
     try {
         const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
@@ -28,9 +28,11 @@ io.on('connection', (socket) => {
         let translated = text;
         try {
             if (lang === 'it') {
+                // Italiano → Polacco
                 translated = await translateText(text, 'it', 'pl');
                 console.log(`📝 Tradotto (IT→PL): "${translated}"`);
             } else if (lang === 'pl') {
+                // Polacco → Italiano
                 translated = await translateText(text, 'pl', 'it');
                 console.log(`📝 Tradotto (PL→IT): "${translated}"`);
             }
@@ -39,6 +41,7 @@ io.on('connection', (socket) => {
             translated = text;
         }
 
+        // Invia a TUTTI i client (incluso chi ha scritto)
         io.emit('message', {
             original: text,
             translated: translated,
