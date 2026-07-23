@@ -25,7 +25,6 @@
             gap: 8px;
         }
 
-        /* VIDEO - PIÙ PICCOLI */
         .video-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -55,7 +54,6 @@
             color: #aaa;
         }
 
-        /* CONTROLLI */
         .controls {
             display: flex;
             gap: 10px;
@@ -79,7 +77,6 @@
             color: #fff;
         }
 
-        /* CHAT - SCROLLABILE */
         .chat-area {
             background: #1a1a1a;
             border-radius: 12px;
@@ -126,7 +123,6 @@
             font-style: italic;
         }
 
-        /* INPUT - SEMPRE VISIBILE */
         .input-area {
             display: flex;
             gap: 8px;
@@ -160,7 +156,6 @@
             white-space: nowrap;
         }
 
-        /* SMARTPHONE */
         @media (max-width: 600px) {
             body { padding: 4px; }
             .video-grid {
@@ -171,20 +166,19 @@
                 max-height: 200px;
                 aspect-ratio: 16/9;
             }
-            .video-label { font-size: 9px; padding: 2px 8px; }
             .controls button { font-size: 10px; padding: 4px 10px; }
             .chat-area { min-height: 150px; }
             .messages { max-height: 200px; min-height: 80px; }
             .message { font-size: 12px; padding: 5px 10px; }
             .input-area input { font-size: 12px; padding: 6px 10px; }
             .input-area button { font-size: 12px; padding: 6px 12px; }
+            .video-label { font-size: 9px; padding: 2px 8px; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- VIDEO -->
     <div class="video-grid">
         <div class="video-wrapper">
             <video id="localVideo" autoplay muted playsinline></video>
@@ -196,14 +190,12 @@
         </div>
     </div>
 
-    <!-- CONTROLLI -->
     <div class="controls">
         <button id="micBtn" class="active">🎤 Microfono</button>
         <button id="camBtn" class="active">📷 Camera</button>
-        <button id="langBtn">🌐 IT → PL</button>
+        <button id="langBtn">🇮🇹 IT → PL 🇵🇱</button>
     </div>
 
-    <!-- CHAT -->
     <div class="chat-area">
         <div class="messages" id="messages"></div>
         <div class="input-area">
@@ -227,6 +219,7 @@
 
     let localStream, peerConnection;
     let micEnabled = true, camEnabled = true;
+    let currentLang = 'it'; // 'it' o 'pl'
 
     const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
@@ -275,8 +268,7 @@
 
     function sendMessage(text) {
         if (!text.trim()) return;
-        const lang = langBtn.textContent.includes('PL') ? 'it' : 'pl';
-        socket.emit('message', { text: text.trim(), lang });
+        socket.emit('message', { text: text.trim(), lang: currentLang });
         addMessage(text, 'me', '');
         msgInput.value = '';
     }
@@ -299,6 +291,24 @@
         messages.scrollTop = messages.scrollHeight;
     }
 
+    // === PULSANTE LINGUA ===
+    langBtn.addEventListener('click', function() {
+        if (currentLang === 'it') {
+            currentLang = 'pl';
+            this.textContent = '🇵🇱 PL → IT 🇮🇹';
+            this.style.background = '#2b6bff';
+            this.style.borderColor = '#2b6bff';
+            this.style.color = '#fff';
+        } else {
+            currentLang = 'it';
+            this.textContent = '🇮🇹 IT → PL 🇵🇱';
+            this.style.background = 'transparent';
+            this.style.borderColor = '#333';
+            this.style.color = '#ccc';
+        }
+        console.log('🔁 Lingua cambiata a:', currentLang);
+    });
+
     sendBtn.addEventListener('click', () => sendMessage(msgInput.value));
     msgInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage(msgInput.value);
@@ -316,11 +326,6 @@
         camBtn.textContent = camEnabled ? '📷 Camera' : '🚫 Camera';
         camBtn.classList.toggle('active', camEnabled);
         if (localStream) localStream.getVideoTracks().forEach(t => t.enabled = camEnabled);
-    });
-
-    langBtn.addEventListener('click', () => {
-        const current = langBtn.textContent.includes('PL') ? 'IT' : 'PL';
-        langBtn.textContent = current === 'IT' ? '🌐 IT → PL' : '🌐 PL → IT';
     });
 
     startCamera();
