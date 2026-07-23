@@ -13,35 +13,31 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            padding: 8px;
         }
         .container {
-            display: flex;
-            flex-direction: column;
             max-width: 1200px;
             margin: 0 auto;
             width: 100%;
-            padding: 8px;
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
+        /* VIDEO - PIÙ PICCOLI */
         .video-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
-            padding: 8px;
-            background: #1a1a1a;
-            border-radius: 12px;
         }
         .video-wrapper {
             position: relative;
-            background: #2a2a2a;
+            background: #1a1a1a;
             border-radius: 12px;
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             aspect-ratio: 16/9;
-            min-height: 120px;
+            max-height: 300px;
         }
         .video-wrapper video {
             width: 100%;
@@ -50,33 +46,32 @@
         }
         .video-label {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
-            background: rgba(0,0,0,0.6);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(0,0,0,0.7);
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
             color: #aaa;
         }
 
+        /* CONTROLLI */
         .controls {
             display: flex;
-            gap: 12px;
-            padding: 12px;
-            background: #0f0f0f;
+            gap: 10px;
             justify-content: center;
             flex-wrap: wrap;
+            padding: 4px 0;
         }
         .controls button {
-            padding: 8px 18px;
+            padding: 6px 14px;
             border: 1px solid #333;
             border-radius: 20px;
             background: transparent;
             color: #ccc;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             transition: 0.2s;
-            touch-action: manipulation;
         }
         .controls button.active {
             background: #2b6bff;
@@ -84,33 +79,32 @@
             color: #fff;
         }
 
+        /* CHAT - SCROLLABILE */
         .chat-area {
-            display: flex;
-            flex-direction: column;
             background: #1a1a1a;
             border-radius: 12px;
-            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
             flex: 1;
-            min-height: 250px;
+            min-height: 200px;
         }
 
         .messages {
             flex: 1;
             overflow-y: auto;
-            padding: 12px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            min-height: 150px;
-            max-height: 400px;
-            -webkit-overflow-scrolling: touch;
+            gap: 4px;
+            max-height: 300px;
+            min-height: 120px;
         }
         .message {
             max-width: 80%;
-            padding: 8px 14px;
-            border-radius: 16px;
-            font-size: 14px;
-            line-height: 1.4;
+            padding: 6px 12px;
+            border-radius: 14px;
+            font-size: 13px;
+            line-height: 1.3;
             word-wrap: break-word;
         }
         .message.me {
@@ -126,87 +120,71 @@
             border-bottom-left-radius: 4px;
         }
         .message .translated {
-            font-size: 12px;
-            opacity: 0.7;
+            font-size: 11px;
+            opacity: 0.6;
             margin-top: 2px;
             font-style: italic;
         }
 
+        /* INPUT - SEMPRE VISIBILE */
         .input-area {
             display: flex;
             gap: 8px;
-            padding: 10px 12px;
+            padding: 8px 10px;
             background: #0f0f0f;
             border-top: 1px solid #2a2a2a;
             border-radius: 0 0 12px 12px;
-            flex-shrink: 0;
         }
         .input-area input {
             flex: 1;
-            padding: 10px 16px;
+            padding: 8px 14px;
             border: none;
-            border-radius: 24px;
+            border-radius: 20px;
             background: #2a2a2a;
             color: #fff;
-            font-size: 14px;
+            font-size: 13px;
             outline: none;
-            min-width: 60px;
         }
         .input-area input::placeholder {
             color: #666;
         }
         .input-area button {
-            padding: 10px 20px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 24px;
+            border-radius: 20px;
             background: #2b6bff;
             color: #fff;
             font-weight: 600;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             white-space: nowrap;
         }
 
+        /* SMARTPHONE */
         @media (max-width: 600px) {
-            .container { padding: 4px; }
+            body { padding: 4px; }
             .video-grid {
                 grid-template-columns: 1fr;
                 gap: 4px;
-                padding: 4px;
             }
             .video-wrapper {
+                max-height: 200px;
                 aspect-ratio: 16/9;
-                min-height: 80px;
             }
-            .controls button {
-                font-size: 11px;
-                padding: 6px 12px;
-            }
-            .chat-area { min-height: 200px; }
-            .messages { max-height: 250px; min-height: 100px; }
-            .message {
-                max-width: 90%;
-                font-size: 13px;
-                padding: 6px 12px;
-            }
-            .input-area input {
-                font-size: 13px;
-                padding: 8px 12px;
-            }
-            .input-area button {
-                font-size: 13px;
-                padding: 8px 14px;
-            }
-            .video-label {
-                font-size: 10px;
-                padding: 2px 8px;
-            }
+            .video-label { font-size: 9px; padding: 2px 8px; }
+            .controls button { font-size: 10px; padding: 4px 10px; }
+            .chat-area { min-height: 150px; }
+            .messages { max-height: 200px; min-height: 80px; }
+            .message { font-size: 12px; padding: 5px 10px; }
+            .input-area input { font-size: 12px; padding: 6px 10px; }
+            .input-area button { font-size: 12px; padding: 6px 12px; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- VIDEO -->
     <div class="video-grid">
         <div class="video-wrapper">
             <video id="localVideo" autoplay muted playsinline></video>
@@ -218,12 +196,14 @@
         </div>
     </div>
 
+    <!-- CONTROLLI -->
     <div class="controls">
         <button id="micBtn" class="active">🎤 Microfono</button>
         <button id="camBtn" class="active">📷 Camera</button>
         <button id="langBtn">🌐 IT → PL</button>
     </div>
 
+    <!-- CHAT -->
     <div class="chat-area">
         <div class="messages" id="messages"></div>
         <div class="input-area">
@@ -248,48 +228,32 @@
     let localStream, peerConnection;
     let micEnabled = true, camEnabled = true;
 
-    const servers = {
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-    };
+    const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
     async function startCamera() {
         try {
-            localStream = await navigator.mediaDevices.getUserMedia({
-                video: camEnabled,
-                audio: micEnabled
-            });
+            localStream = await navigator.mediaDevices.getUserMedia({ video: camEnabled, audio: micEnabled });
             localVideo.srcObject = localStream;
             createPeerConnection();
-        } catch (e) {
-            console.error('Errore camera:', e);
-        }
+        } catch (e) { console.error('Errore camera:', e); }
     }
 
     function createPeerConnection() {
         peerConnection = new RTCPeerConnection(servers);
-        localStream.getTracks().forEach(track => {
-            peerConnection.addTrack(track, localStream);
-        });
-
-        peerConnection.ontrack = (event) => {
-            remoteVideo.srcObject = event.streams[0];
-        };
-
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        peerConnection.ontrack = (event) => { remoteVideo.srcObject = event.streams[0]; };
         peerConnection.onicecandidate = (event) => {
             if (event.candidate) socket.emit('candidate', event.candidate);
         };
-
         if (!window._offerSent) {
             window._offerSent = true;
-            setTimeout(createOffer, 500);
+            setTimeout(() => {
+                peerConnection.createOffer()
+                    .then(offer => peerConnection.setLocalDescription(offer))
+                    .then(() => socket.emit('offer', peerConnection.localDescription))
+                    .catch(console.error);
+            }, 500);
         }
-    }
-
-    function createOffer() {
-        peerConnection.createOffer()
-            .then(offer => peerConnection.setLocalDescription(offer))
-            .then(() => socket.emit('offer', peerConnection.localDescription))
-            .catch(console.error);
     }
 
     socket.on('offer', async (offer) => {
@@ -344,18 +308,14 @@
         micEnabled = !micEnabled;
         micBtn.textContent = micEnabled ? '🎤 Microfono' : '🔇 Microfono';
         micBtn.classList.toggle('active', micEnabled);
-        if (localStream) {
-            localStream.getAudioTracks().forEach(t => t.enabled = micEnabled);
-        }
+        if (localStream) localStream.getAudioTracks().forEach(t => t.enabled = micEnabled);
     });
 
     camBtn.addEventListener('click', () => {
         camEnabled = !camEnabled;
         camBtn.textContent = camEnabled ? '📷 Camera' : '🚫 Camera';
         camBtn.classList.toggle('active', camEnabled);
-        if (localStream) {
-            localStream.getVideoTracks().forEach(t => t.enabled = camEnabled);
-        }
+        if (localStream) localStream.getVideoTracks().forEach(t => t.enabled = camEnabled);
     });
 
     langBtn.addEventListener('click', () => {
@@ -364,9 +324,7 @@
     });
 
     startCamera();
-    setTimeout(() => {
-        if (!peerConnection) createPeerConnection();
-    }, 3000);
+    setTimeout(() => { if (!peerConnection) createPeerConnection(); }, 3000);
 </script>
 </body>
 </html>
