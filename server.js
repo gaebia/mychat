@@ -3,12 +3,18 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 
-// Usa la versione con fetch (senza dipendenze extra)
-const translate = require('translate');
-
-// Configura il motore di traduzione
-translate.engine = 'google';
-translate.key = ''; // vuoto per uso gratuito
+// Traduzione con fetch diretto (senza librerie)
+async function translateText(text, from, to) {
+    try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        return data[0][0][0] || text;
+    } catch (e) {
+        console.error('❌ Errore traduzione:', e.message);
+        return text;
+    }
+}
 
 app.use(express.static('public'));
 
@@ -22,17 +28,15 @@ io.on('connection', (socket) => {
         let translated = text;
         try {
             if (lang === 'it') {
-                // Traduci dall'italiano al polacco
-                translated = await translate(text, { from: 'it', to: 'pl' });
+                translated = await translateText(text, 'it', 'pl');
                 console.log(`📝 Tradotto (IT→PL): "${translated}"`);
             } else if (lang === 'pl') {
-                // Traduci dal polacco all'italiano
-                translated = await translate(text, { from: 'pl', to: 'it' });
+                translated = await translateText(text, 'pl', 'it');
                 console.log(`📝 Tradotto (PL→IT): "${translated}"`);
             }
         } catch (e) {
             console.error('❌ Errore traduzione:', e.message);
-            translated = text + ' (traduzione non disponibile)';
+            translated = text;
         }
 
         io.emit('message', {
