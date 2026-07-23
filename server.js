@@ -2,11 +2,7 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
-const translate = require('translate');
-
-// Configurazione traduzione (usa Google Translate gratis)
-translate.engine = 'google';
-translate.key = process.env.GOOGLE_API_KEY || ''; // opzionale
+const translate = require('@vitalets/google-translate-api');
 
 app.use(express.static('public'));
 
@@ -20,18 +16,19 @@ io.on('connection', (socket) => {
         let translated = text;
         try {
             if (lang === 'it') {
-                translated = await translate(text, { from: 'it', to: 'pl' });
+                const result = await translate(text, { from: 'it', to: 'pl' });
+                translated = result.text;
                 console.log(`📝 Tradotto (IT→PL): "${translated}"`);
             } else if (lang === 'pl') {
-                translated = await translate(text, { from: 'pl', to: 'it' });
+                const result = await translate(text, { from: 'pl', to: 'it' });
+                translated = result.text;
                 console.log(`📝 Tradotto (PL→IT): "${translated}"`);
             }
         } catch (e) {
             console.error('❌ Errore traduzione:', e.message);
-            translated = text; // fallback
+            translated = text;
         }
 
-        // Invia a TUTTI i client (incluso chi ha scritto)
         io.emit('message', {
             original: text,
             translated: translated,
