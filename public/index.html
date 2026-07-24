@@ -76,6 +76,11 @@
             border-color: #2b6bff;
             color: #fff;
         }
+        .controls button#locationBtn:hover {
+            background: #2b6bff;
+            border-color: #2b6bff;
+            color: #fff;
+        }
 
         .chat-area {
             background: #1a1a1a;
@@ -121,6 +126,13 @@
             opacity: 0.6;
             margin-top: 2px;
             font-style: italic;
+        }
+        .message a {
+            color: #4a9eff;
+            text-decoration: none;
+        }
+        .message a:hover {
+            text-decoration: underline;
         }
 
         .input-area {
@@ -194,6 +206,7 @@
         <button id="micBtn" class="active">🎤 Microfono</button>
         <button id="camBtn" class="active">📷 Camera</button>
         <button id="langBtn">🇮🇹 IT → PL 🇵🇱</button>
+        <button id="locationBtn">📍 Posizione</button>
     </div>
 
     <div class="chat-area">
@@ -216,10 +229,11 @@
     const micBtn = document.getElementById('micBtn');
     const camBtn = document.getElementById('camBtn');
     const langBtn = document.getElementById('langBtn');
+    const locationBtn = document.getElementById('locationBtn');
 
     let localStream, peerConnection;
     let micEnabled = true, camEnabled = true;
-    let currentLang = 'it'; // 'it' o 'pl'
+    let currentLang = 'it';
 
     const servers = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
@@ -266,6 +280,50 @@
         if (peerConnection) peerConnection.addIceCandidate(candidate);
     });
 
+    // === POSIZIONE ===
+    function sendLocation() {
+        if (!navigator.geolocation) {
+            alert('Il tuo browser non supporta la geolocalizzazione.');
+            return;
+        }
+
+        locationBtn.textContent = '⏳ Caricamento...';
+        locationBtn.disabled = true;
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                const accuracy = position.coords.accuracy;
+
+                // Link Google Maps con Street View
+                const mapsLink = `https://www.google.com/maps?q=${latitude},${longitude}&layer=c&cbll=${latitude},${longitude}`;
+                const streetViewLink = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${latitude},${longitude}`;
+
+                const message = `📍 Posizione:\n📌 Mappa: ${mapsLink}\n🔄 Street View: ${streetViewLink}\n📏 Precisione: ${Math.round(accuracy)}m`;
+
+                socket.emit('message', { text: message, lang: 'it' });
+                addMessage('📍 Posizione condivisa!', 'me', '');
+
+                locationBtn.textContent = '📍 Posizione';
+                locationBtn.disabled = false;
+            },
+            (error) => {
+                console.error('Errore posizione:', error);
+                alert('Errore nel recuperare la posizione: ' + error.message);
+                locationBtn.textContent = '📍 Posizione';
+                locationBtn.disabled = false;
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 15000,
+                maximumAge: 0
+            }
+        );
+    }
+
+    locationBtn.addEventListener('click', sendLocation);
+
+    // === MESSAGGI ===
     function sendMessage(text) {
         if (!text.trim()) return;
         socket.emit('message', { text: text.trim(), lang: currentLang });
@@ -280,7 +338,14 @@
     function addMessage(text, type, translated) {
         const div = document.createElement('div');
         div.className = `message ${type}`;
-        div.innerHTML = text;
+
+        // Converti i link in cliccabili
+        const formattedText = text.replace(
+            /(https?:\/\/[^\s]+)/g,
+            (url) => `<a href="${url}" target="_blank">${url}</a>`
+        );
+        div.innerHTML = formattedText;
+
         if (translated && translated !== text) {
             const small = document.createElement('div');
             small.className = 'translated';
@@ -291,7 +356,7 @@
         messages.scrollTop = messages.scrollHeight;
     }
 
-    // === PULSANTE LINGUA ===
+    // === PULSANTI ===
     langBtn.addEventListener('click', function() {
         if (currentLang === 'it') {
             currentLang = 'pl';
